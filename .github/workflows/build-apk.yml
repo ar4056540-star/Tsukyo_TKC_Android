@@ -1,0 +1,38 @@
+
+name: Build TKC Android APK
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y git zip unzip build-essential
+          pip install buildozer cython==0.29.36
+
+      - name: Build APK
+        run: buildozer android debug
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: TKC-Android-APK
+          path: bin/*.apk
+          if-no-files-found: warn
